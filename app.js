@@ -24,7 +24,7 @@ readFile("/mnt/d/Repo/WFSDialer/AgentList.csv").then(fileBuffer => {
     });
     
 
-    let currentPollCycle = 0;
+    //let currentPollCycle = 0;
 
 
     
