@@ -26,16 +26,29 @@ readFile("/mnt/d/Repo/WFSDialer/AgentList.csv").then(fileBuffer => {
 
     //let currentPollCycle = 0;
 
+    agents.forEach((agent,index) =>{
+        ews.findItem(agent,startDate,endDate).then(res => {
+            //console.log(res);
+            agent.calendarItems.forEach(calendarItem => {
+                //console.log(calendarItem.ItemId.attributes.Id);
+                ews.getItem(agent,calendarItem).then(res => {
+
+                }).then( res => {
+                    console.log(agent.detailedItems)
+                })
+            })    
+        })
+    })
+    
+
+
 
     
-    ews.findItem(agents[0],startDate,endDate).then(res => {
-        
-    })
 
-    setTimeout( () => {
-        console.log(agents[0].calendarItems)
-        console.log(agents[0].calendarItems.length)
-    },10000)
+    // setTimeout( () => {
+    //     console.log(agents[0].calendarItems)
+    //     console.log(agents[0].calendarItems.length)
+    // },10000)
 
 
  
