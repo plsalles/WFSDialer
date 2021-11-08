@@ -4,21 +4,22 @@ class EWSController {
  
     findItem = async (agent, startDate, endDate) => {
         
-    
-        console.log("findItem ------------->",agent);
-
         // exchange server connection info
         const ewsConfig = {
-            //When communicating directly with outlook O365
-            //username: agent.serviceAccountEmailAddress,
-            //password: agent.serviceAccountPassword,
-            // username: 'local\paulo.salles1',
-            // password: 'Asd123!.',
-            username: "paulo.salles@t3nsd.onmicrosoft.com",
-            password: 'Polycom123',
-            host: `https://outlook.office365.com`,
+            //When communicating with WFS - Necessary to change the FQDN in the bottom of services.wsdl file
+            username: `${agent.roomDomain}\\${agent.serviceAccountEmailAddress}`,
+            password: agent.serviceAccountPassword,
+            host: `https://10.10.30.71:9999`,
             auth: 'basic',
             temp: '/mnt/d/Repo/WFSDialer'
+
+            
+            //When communicating directly with outlook O365 - Necessary to change the FQDN in the bottom of services.wsdl file
+            // username: "paulo.salles@t3nsd.onmicrosoft.com",
+            // password: 'Polycom123',
+            // host: `https://outlook.office365.com`,
+            // auth: 'basic',
+            // temp: '/mnt/d/Repo/WFSDialer'
         };
         
         // define custom soap header
@@ -102,8 +103,8 @@ class EWSController {
             },
             'tns:CalendarView': {
                 'attributes': {
-                    'StartDate': startDate,
                     'EndDate': endDate,
+                    'StartDate': startDate,
                     'MaxEntriesReturned': '1024'
                 }
             },
