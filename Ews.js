@@ -6,20 +6,18 @@ class EWSController {
         
         // exchange server connection info
         const ewsConfig = {
-            //When communicating with WFS - Necessary to change the FQDN in the bottom of services.wsdl file
-            username: `${agent.roomDomain}\\${agent.serviceAccountEmailAddress}`,
-            password: agent.serviceAccountPassword,
-            host: `https://10.10.30.71:9999`,
+            //When communicating with WFS
+            //username: agent.serviceAccountEmailAddress,
+            //password: agent.serviceAccountPassword,
+            // username: 'local\paulo.salles1',
+            // password: 'Asd123!.',
+            
+            //Talking directly to O365 - Necessary to change the FQDN in the services.wsdl file
+            username: "paulo.salles@t3nsd.onmicrosoft.com",
+            password: 'Polycom123',
+            host: `https://outlook.office365.com`,
             auth: 'basic',
             temp: '/mnt/d/Repo/WFSDialer'
-
-            
-            //When communicating directly with outlook O365 - Necessary to change the FQDN in the bottom of services.wsdl file
-            // username: "paulo.salles@t3nsd.onmicrosoft.com",
-            // password: 'Polycom123',
-            // host: `https://outlook.office365.com`,
-            // auth: 'basic',
-            // temp: '/mnt/d/Repo/WFSDialer'
         };
         
         // define custom soap header
@@ -103,8 +101,8 @@ class EWSController {
             },
             'tns:CalendarView': {
                 'attributes': {
-                    'EndDate': endDate,
                     'StartDate': startDate,
+                    'EndDate': endDate,
                     'MaxEntriesReturned': '1024'
                 }
             },
@@ -127,8 +125,9 @@ class EWSController {
                 //console.log(result)
                 
                 //console.log(JSON.stringify(result));
-                agent.calendarItems = result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem;
-                //console.log(JSON.stringify(result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem));
+                agent.calendarItems.push(result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem);
+                console.log(JSON.stringify(result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem));
+                console.log(agent)
 
                 return result;
                 })
