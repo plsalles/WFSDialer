@@ -22,9 +22,12 @@ readFile("/mnt/d/Repo/WFSDialer/AgentList.csv").then(fileBuffer => {
 
     //let currentPollCycle = 0;
     console.log(`${new Date()} - Starting new Polling Event`)    
+    console.log(agents)
     agents.forEach( async (agent,index) =>{
        getCalendarItems(agent,startDate,endDate).then(() =>{
             console.log(`${new Date()} - Polling for agent ${agent.agentName} - Room Mailbox ${agent.roomEmailAddress} has finished`)
+            agent.calendarItems = [];
+            agent.detailedItems = [];
        })
        
     })
@@ -32,17 +35,26 @@ readFile("/mnt/d/Repo/WFSDialer/AgentList.csv").then(fileBuffer => {
     setInterval(() => {
         console.log(`${new Date()} - Starting new Polling Event`)
         agents.forEach((agent,index) =>{
-             getCalendarItems(agent,startDate,endDate)})
+             getCalendarItems(agent,startDate,endDate).then(() => {
+                agent.calendarItems = [];
+                agent.detailedItems = [];
+             })
+        })
     },60000)
 })
 
 async function getCalendarItems(agent,startDate,endDate) {
     console.log(`${new Date()} - Polling for agent ${agent.agentName} - Room Mailbox ${agent.roomEmailAddress}`)
     await ews.findItem(agent,startDate,endDate)
-    console.log(`${new Date()} - Find Item for agent ${agent.agentName} - Room Mailbox ${agent.roomEmailAddress} returned ${agent.calendarItems.length} calendar items`)
-    await agent.calendarItems.forEach(async (calendarItem, index) => {
-          await ews.getItem(agent,calendarItem)
-          console.log(`${new Date()} - getItem for iten number ${index + 1} for agent ${agent.agentName} - Room Mailbox ${agent.roomEmailAddress} has finished`)
-            })
+    console.log(`${new Date()} - Find Item for agent ${agent.agentName} - Room Mailbox ${agent.roomEmailAddress} - Room Challengue user/passw ${agent.roomDomain}\\${agent.roomUser} returned ${agent.calendarItems.length} calendar items`)
+    
+    console.log(agent.calendarItems.length)
+    if(agent.calendarItems.length > 0){
+        await agent.calendarItems.forEach(async (calendarItem, index) => {
+            await ews.getItem(agent,calendarItem)
+            //console.log(`${new Date()} - getItem for iten number ${index + 1} for agent ${agent.agentName} - Room Mailbox ${agent.roomEmailAddress} has finished`)
+              })
+    }
+   
     console.log(`${new Date()} - Polling for agent ${agent.agentName} - Room Mailbox ${agent.roomEmailAddress} has finished`)
 }

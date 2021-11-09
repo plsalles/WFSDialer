@@ -1,4 +1,5 @@
 const EWS = require('node-ews');
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 class EWSController {
  
@@ -7,18 +8,24 @@ class EWSController {
         // exchange server connection info
         const ewsConfig = {
             //When communicating with WFS
-            //username: agent.serviceAccountEmailAddress,
-            //password: agent.serviceAccountPassword,
-            // username: 'local\paulo.salles1',
+            username: `${agent.roomDomain}\\${agent.roomUser}`,
+            password: agent.roomPassword,
+            // username: 'local\room201',
             // password: 'Asd123!.',
+            host: `https://10.10.30.71`,
             
             //Talking directly to O365 - Necessary to change the FQDN in the services.wsdl file
-            username: "paulo.salles@t3nsd.onmicrosoft.com",
-            password: 'Polycom123',
-            host: `https://outlook.office365.com`,
-            auth: 'basic',
+            // username: "paulo.salles@t3nsd.onmicrosoft.com",
+            // password: 'Polycom123',
+            // host: `https://outlook.office365.com`,
+            //auth: 'basic',
             temp: '/mnt/d/Repo/WFSDialer'
         };
+
+        const options = {
+            rejectUnauthorized: false,
+            strictSSL: false
+           };
         
         // define custom soap header
         let ewsSoapHeader = {
@@ -31,7 +38,7 @@ class EWSController {
         
         
         // initialize node-ews
-        const ews = new EWS(ewsConfig);
+        const ews = new EWS(ewsConfig, options);
         
         // define ews api function
         const ewsFunction = 'FindItem';
@@ -41,7 +48,7 @@ class EWSController {
             'attributes': {
                 'Traversal': 'Shallow'
             },
-            'tns:ItemShape': {
+            'm:ItemShape': {
                 't:BaseShape': 'AllProperties',
                 't:AditionalProperties': {
                     't:FieldURI': {
@@ -99,14 +106,14 @@ class EWSController {
                     },
                 }
             },
-            'tns:CalendarView': {
+            'm:CalendarView': {
                 'attributes': {
                     'StartDate': startDate,
                     'EndDate': endDate,
                     'MaxEntriesReturned': '1024'
                 }
             },
-            'tns:ParentFolderIds' : {
+            'm:ParentFolderIds' : {
                 't:DistinguishedFolderId': {
                     'attributes': {
                         'Id': 'calendar',          
@@ -121,17 +128,18 @@ class EWSController {
    
         await ews.run(ewsFunction, ewsArgs, ewsSoapHeader)
                 .then(result => {
-                
-                //console.log(result)
-                
-                //console.log(JSON.stringify(result));
+
+                //if (result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem != "undefined" && result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem != "null"){
                 agent.calendarItems.push(result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem);
-                console.log(JSON.stringify(result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem));
-                console.log(agent)
+                //}
+                
+                // console.log(JSON.stringify(result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem));
+                // console.log(agent)
 
                 return result;
                 })
                 .catch(err => {
+                
                 console.log(err.statusCode);
                 console.log(err);
                 //res.status(500).json("The request failed");
@@ -144,11 +152,11 @@ class EWSController {
             // exchange server connection info
             const ewsConfig = {
              //When communicating directly with outlook O365
-            //username: data.serviceAccountEmailAddress,
-             //password: data.serviceAccountPassword,
-             username: "paulo.salles@t3nsd.onmicrosoft.com",
-             password: 'Polycom123',
-             host: `https://outlook.office365.com`,
+             username: `${agent.roomDomain}\\${agent.roomUser}`,
+             password: agent.roomPassword,
+            //  username: "paulo.salles@t3nsd.onmicrosoft.com",
+            //  password: 'Polycom123',
+             host: `https://10.10.30.71`,
              auth: 'basic',
              temp: '/mnt/d/Repo/WFSDialer'
             };
@@ -175,7 +183,7 @@ class EWSController {
                 'attributes': {
                     'Traversal': 'Shallow'
                 },
-                'tns:ItemShape': {
+                'm:ItemShape': {
                     't:BaseShape': 'AllProperties',
                     't:BodyType': 'Text',
                     't:AditionalProperties': {
@@ -202,7 +210,7 @@ class EWSController {
                         },
                     }
                 },
-                'tns:ItemIds': {
+                'm:ItemIds': {
                     't:ItemId': {
                         'attributes': {
                             'Id': calendarItem.ItemId.attributes.Id,
@@ -213,7 +221,7 @@ class EWSController {
             
             await ews.run(ewsFunction, ewsArgs, ewsSoapHeader)
                     .then(result => {
-                    //console.log(JSON.stringify(result));
+                    console.log(JSON.stringify(result));
                     agent.detailedItems.push(result.ResponseMessages)
                     return result;
                     })
