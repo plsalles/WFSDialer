@@ -4,7 +4,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 class EWSController {
  
     findItem = async (agent, startDate, endDate) => {
-        
+        console.log("FindItem Start Date:",startDate)
+        console.log("FindItem End Date:",endDate)
         // exchange server connection info
         const ewsConfig = {
             //When communicating with WFS
@@ -128,21 +129,29 @@ class EWSController {
    
         await ews.run(ewsFunction, ewsArgs, ewsSoapHeader)
                 .then(result => {
-
-                //if (result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem != "undefined" && result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem != "null"){
-                agent.calendarItems.push(result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem);
-                //}
                 
-                // console.log(JSON.stringify(result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem));
-                // console.log(agent)
+                let calendarItems = result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem;
+                console.log("CalendarItem Length ----->",calendarItems.length)
+                
+                if(!calendarItems.length){
+                    agent.calendarItems.push(calendarItems);
+                } else {
+                    result.ResponseMessages.FindItemResponseMessage.RootFolder.Items.CalendarItem.forEach( calendarItem => {
+                        agent.calendarItems.push(calendarItem);
+                    })
+                }
 
                 return result;
+
                 })
                 .catch(err => {
+                console.log(err)
+                if (err.statusCode){
+                    console.log(err.statusCode);
+                    console.log(err);
                 
-                console.log(err.statusCode);
-                console.log(err);
-                //res.status(500).json("The request failed");
+                }    
+
                 });
         };
 
@@ -226,7 +235,7 @@ class EWSController {
                     return result;
                     })
                     .catch(err => {
-                        console.log("linha 223")     
+                        console.log(err.status)     
                         console.log(err);
                     
                     });
